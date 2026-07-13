@@ -1,20 +1,29 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { LANGS } from '@/lib/i18n'
 import { useApp } from './providers'
 import { Badge } from './views'
+import { getAuthState, signInWithGoogle, hasBackend } from '@/lib/api'
 
 export function Header() {
   const { lang, setLang, t, myStars } = useApp()
   const [open, setOpen] = useState(false)
+  const [anon, setAnon] = useState(false)
   const path = usePathname()
+
+  useEffect(() => {
+    if (!hasBackend) return
+    getAuthState().then(s => setAnon(s.isAnonymous)).catch(() => {})
+  }, [])
+
   const links: [string, string][] = [
     ['/', t('nav.matches', 'Matches')],
     ['/leaderboard', t('nav.leaderboard', 'Leaderboard')],
     ['/profile', t('nav.profile', 'Profile')],
   ]
+
   return (
     <header className="topbar" onClick={() => setOpen(false)}>
       <div className="topbar-in">
@@ -42,6 +51,11 @@ export function Header() {
                   </button>))}
               </div>)}
           </div>
+          {anon && (
+            <button className="signin-btn" onClick={() => signInWithGoogle()}>
+              {t('nav.signin', 'Sign in')}
+            </button>
+          )}
           <div className="you-chip">
             <span className="you-badges">{[...myStars].map(sp => <Badge key={sp} sport={sp} t={t} />)}</span>
             <span className="lb">{t('you.skill', 'Skill')}</span>
