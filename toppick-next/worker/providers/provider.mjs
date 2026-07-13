@@ -1,28 +1,16 @@
-// ============================================================
 // Provider adapter — the ONLY file that knows the sports data API.
-// Reference implementation: TheSportsDB (free tier, good for dev).
-// For production volume/latency switch to a commercial feed
-// (API-SPORTS, Sportradar, SportsDataIO) by rewriting these two
-// functions; the worker and DB never change.
-//
-// Contract:
-//   fetchFixtures(sport)        -> [{ extId, league, startsAt, status, clock, teamA, teamB }]
-//   fetchFinishedResults(sport) -> [{ extId, winner: 'a' | 'b' | null }]   // null = draw/void -> skipped
-// ============================================================
+// TheSportsDB free tier.
 
-const KEY = process.env.SPORTS_API_KEY || '3' // '3' = TheSportsDB free test key
+const KEY = process.env.SPORTS_API_KEY || '3'
 const BASE = `https://www.thesportsdb.com/api/v1/json/${KEY}`
 
-// League ids to track per sport (TheSportsDB ids). Extend freely.
+// slug must match lib/mock.ts LEAGUES ids.
 const LEAGUES = {
-  // `slug` must match the frontend league tab ids in src/mock.ts LEAGUES.
-  // TheSportsDB has no UCL/UEL fixtures on the free tier; Premier League /
-  // La Liga are mapped onto the top-2 soccer tabs for v1 ingestion. Swap ids
-  // when moving to a paid data provider.
-  soccer:   [{ id: '4328', name: 'Premier League', slug: 'ucl' }, { id: '4335', name: 'La Liga', slug: 'uel' }],
-  baseball: [{ id: '4424', name: 'MLB', slug: 'mlb' }],
-  basketball: [{ id: '4387', name: 'NBA', slug: 'nba' }],
-  ufc:      [{ id: '4443', name: 'UFC', slug: 'ppv' }],
+  soccer:   [{ id: '4328', name: 'Premier League', slug: 'epl' },
+             { id: '4335', name: 'La Liga',        slug: 'laliga' }],
+  baseball: [{ id: '4424', name: 'MLB',            slug: 'mlb' }],
+  basketball: [{ id: '4387', name: 'NBA',          slug: 'nba' }],
+  ufc:      [{ id: '4443', name: 'UFC',            slug: 'ufc' }],
 }
 
 const PALETTE = ['#EF3340', '#6CABDD', '#005A9C', '#A50044', '#FEBE10', '#4A6FA5', '#C30452', '#131230', '#8895a7', '#D64550']
@@ -35,17 +23,33 @@ async function getJSON(path) {
   return res.json()
 }
 
-function mapEvent(ev, leagueName) {
-  const done = ev.strStatus === 'Match Finished' || ev.strStatus === 'FT' || (ev.intHomeScore != null && ev.intAwayScore != null && ev.strStatus !== 'Not Started')
+// MMA events have empty strHomeTeam/strAwayTeam; names live in strEvent
+// e.g. "UFC 300: Pereira vs. Hill"
+function parseFighters(ev) {
+  const s = ev.strEvent ?? ''
+  const body = s.includes(':') ? s.split(':').slice(1).join(':') : s
+  const parts = body.split(/\s+vs\.?\s+/i)
+  if (parts.length >= 2) return [parts[0].trim(), parts[1].trim()]
+  return [null, null]
+}
+
+function mapEvent(ev, leagueSlug) {
+  const done = ev.strStatus === 'Match Finished' || ev.strStatus === 'FT' ||
+    (ev.intHomeScore != null && ev.intAwayScore != null && ev.strStatus !== 'Not Started')
   const live = !done && ev.strStatus && !['Not Started', 'NS', ''].includes(ev.strStatus)
+
+  let a = ev.strHomeTeam, b = ev.strAwayTeam
+  if (!a || !b) { const [fa, fb] = parseFighters(ev); a = a || fa; b = b || fb }
+  if (!a || !b) return null
+
   return {
     extId: `tsdb-${ev.idEvent}`,
-    league: leagueName,
+    league: leagueSlug,
     startsAt: ev.strTimestamp ?? `${ev.dateEvent}T${ev.strTime ?? '00:00:00'}Z`,
     status: done ? 'final' : live ? 'live' : 'scheduled',
     clock: live ? (ev.strProgress ?? 'LIVE') : done ? 'FT' : '',
-    teamA: { name: ev.strHomeTeam, abbr: abbr(ev.strHomeTeam), color: color(ev.strHomeTeam) },
-    teamB: { name: ev.strAwayTeam, abbr: abbr(ev.strAwayTeam), color: color(ev.strAwayTeam) },
+    teamA: { name: a, abbr: abbr(a), color: color(a) },
+    teamB: { name: b, abbr: abbr(b), color: color(b) },
     homeScore: ev.intHomeScore != null ? Number(ev.intHomeScore) : null,
     awayScore: ev.intAwayScore != null ? Number(ev.intAwayScore) : null,
   }
@@ -57,8 +61,8 @@ export async function fetchFixtures(sport) {
     try {
       const data = await getJSON(`eventsnextleague.php?id=${lg.id}`)
       for (const ev of data.events ?? []) {
-        const m = mapEvent(ev, lg.slug ?? lg.name)
-        if (m.status !== 'final') out.push(m)
+        const m = mapEvent(ev, lg.slug)
+        if (m && m.status !== 'final') out.push(m)
       }
     } catch (e) { console.error(`[provider] fixtures ${sport}/${lg.name}:`, e.message) }
   }
@@ -71,10 +75,8 @@ export async function fetchFinishedResults(sport) {
     try {
       const data = await getJSON(`eventspastleague.php?id=${lg.id}`)
       for (const ev of data.events ?? []) {
-        const m = mapEvent(ev, lg.slug ?? lg.name)
-        if (m.status !== 'final' || m.homeScore == null || m.awayScore == null) continue
-        // Draws return null and are skipped (v1 product = two-way markets;
-        // add a 'draw' side or void policy when soccer 3-way markets ship).
+        const m = mapEvent(ev, lg.slug)
+        if (!m || m.status !== 'final' || m.homeScore == null || m.awayScore == null) continue
         const winner = m.homeScore > m.awayScore ? 'a' : m.awayScore > m.homeScore ? 'b' : null
         out.push({ extId: m.extId, winner })
       }
