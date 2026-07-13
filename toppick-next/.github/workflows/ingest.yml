@@ -1,0 +1,27 @@
+# Scheduled results worker — free scheduler via GitHub Actions.
+# Repo secrets required: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SPORTS_API_KEY
+name: ingest-and-resolve
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # every 10 minutes
+  workflow_dispatch: {}       # manual run button
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install @supabase/supabase-js --no-save
+      - name: Ingest fixtures
+        run: node worker/index.mjs ingest
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SPORTS_API_KEY: ${{ secrets.SPORTS_API_KEY }}
+      - name: Resolve finished games
+        run: node worker/index.mjs resolve
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SPORTS_API_KEY: ${{ secrets.SPORTS_API_KEY }}
