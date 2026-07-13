@@ -23,14 +23,26 @@ async function getJSON(path) {
   return res.json()
 }
 
-// MMA events have empty strHomeTeam/strAwayTeam; names live in strEvent
-// e.g. "UFC 300: Pereira vs. Hill"
+// MMA events leave strHomeTeam/strAwayTeam null; fighter names live in strEvent:
+//   "UFC Fight Night 281 Du Plessis vs Usman"
+//   "UFC 300: Pereira vs. Hill"
 function parseFighters(ev) {
-  const s = ev.strEvent ?? ''
-  const body = s.includes(':') ? s.split(':').slice(1).join(':') : s
-  const parts = body.split(/\s+vs\.?\s+/i)
-  if (parts.length >= 2) return [parts[0].trim(), parts[1].trim()]
-  return [null, null]
+  let s = ev.strEvent ?? ''
+  if (s.includes(':')) s = s.split(':').slice(1).join(':')
+
+  const parts = s.split(/\s+vs\.?\s+/i)
+  if (parts.length < 2) return [null, null]
+
+  let a = parts[0].trim()
+  const b = parts[1].trim()
+
+  // strip the event-title prefix from the left fighter:
+  //   "UFC Fight Night 281 Du Plessis" -> "Du Plessis"
+  //   "UFC 300 Pereira"                -> "Pereira"
+  a = a.replace(/^UFC\s+(?:Fight\s+Night|Fight\s+Pass|on\s+\S+)?\s*\d*\s*/i, '').trim()
+
+  if (!a || !b) return [null, null]
+  return [a, b]
 }
 
 function mapEvent(ev, leagueSlug) {
