@@ -15,17 +15,30 @@ export const hasBackend = Boolean(url && key)
 export const supabase: SupabaseClient | null = hasBackend ? createClient(url!, key!) : null
 
 // ---------- session ----------
+// Guard against concurrent callers: React StrictMode (and any parallel mount)
+// fires this twice, and two simultaneous signInAnonymously() calls create two
+// orphan users. Cache the in-flight promise so only one sign-in ever happens.
+let sessionPromise: Promise<string> | null = null
+
 export async function ensureSession(): Promise<string> {
   if (!supabase) return 'demo-user'
-  const { data } = await supabase.auth.getSession()
-  if (data.session) return data.session.user.id
-  // Anonymous sign-in must be enabled: Dashboard → Auth → Providers → Anonymous
-  const { data: anon, error } = await supabase.auth.signInAnonymously()
-  if (error || !anon.session) {
-    console.warn('[toppick] anonymous auth unavailable, falling back to demo mode:', error?.message)
-    return 'demo-user'
-  }
-  return anon.session.user.id
+  if (sessionPromise) return sessionPromise
+
+  sessionPromise = (async () => {
+    const { data } = await supabase!.auth.getSession()
+    if (data.session) return data.session.user.id
+
+    // Anonymous sign-in must be enabled: Dashboard > Auth > Providers > Anonymous
+    const { data: anon, error } = await supabase!.auth.signInAnonymously()
+    if (error || !anon.session) {
+      console.warn('[toppick] anonymous auth unavailable:', error?.message)
+      sessionPromise = null
+      return 'demo-user'
+    }
+    return anon.session.user.id
+  })()
+
+  return sessionPromise
 }
 
 // ---------- matches & consensus ----------
