@@ -384,3 +384,35 @@ display:flex;align-items:center;gap:10px}
 .sport-btn{padding:10px 14px;font-size:13px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- account upgrade banner ---- */
+.acct-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px 16px; margin-bottom: 20px;
+  background: rgba(255, 138, 0, .08);
+  border: 1px solid rgba(255, 138, 0, .28);
+  border-radius: 12px;
+}
+.acct-txt { display: flex; flex-direction: column; gap: 3px; }
+.acct-txt strong { font-size: 14px; color: #ff8a00; }
+.acct-txt span { font-size: 13px; color: #8895a7; line-height: 1.45; }
+.acct-btn {
+  flex-shrink: 0; padding: 9px 16px; border-radius: 8px;
+  background: #ff8a00; color: #0b1220; border: 0;
+  font-weight: 700; font-size: 13px; cursor: pointer;
+}
+.acct-btn:disabled { opacity: .6; cursor: default; }
+.acct-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; margin-bottom: 20px;
+  border: 1px solid rgba(136, 149, 167, .18); border-radius: 10px;
+}
+.acct-ok { font-size: 13px; color: #8895a7; }
+.acct-out {
+  background: none; border: 0; color: #8895a7;
+  font-size: 13px; cursor: pointer; text-decoration: underline;
+}
+@media (max-width: 640px) {
+  .acct-banner { flex-direction: column; align-items: stretch; }
+  .acct-btn { width: 100%; }
+}

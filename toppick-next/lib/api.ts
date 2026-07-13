@@ -135,3 +135,57 @@ export async function addPost(matchId: number, _label: string, _sport: Sport, bo
   const { error } = await supabase.from('posts').insert({ user_id: uid, match_id: matchId, body })
   if (error) throw error
 }
+
+// ---------- account upgrade (anonymous -> permanent) ----------
+// linkIdentity keeps the SAME user_id, so picks/scores/posts survive.
+// Without this, clearing browser storage destroys the track record.
+
+export type AuthState = {
+  isAnonymous: boolean
+  email: string | null
+  pickCount: number
+}
+
+export async function getAuthState(): Promise<AuthState> {
+  if (!supabase) return { isAnonymous: true, email: null, pickCount: 0 }
+  const { data } = await supabase.auth.getSession()
+  const u = data.session?.user
+  if (!u) return { isAnonymous: true, email: null, pickCount: 0 }
+
+  const { count } = await supabase
+    .from('picks')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', u.id)
+
+  return {
+    isAnonymous: u.is_anonymous ?? false,
+    email: u.email ?? null,
+    pickCount: count ?? 0,
+  }
+}
+
+// Attach Google to the current anonymous session (same user_id).
+export async function linkGoogle(): Promise<void> {
+  if (!supabase) return
+  const { error } = await supabase.auth.linkIdentity({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + window.location.pathname },
+  })
+  if (error) throw error
+}
+
+// Sign in with Google when there is no session to preserve.
+export async function signInWithGoogle(): Promise<void> {
+  if (!supabase) return
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + window.location.pathname },
+  })
+  if (error) throw error
+}
+
+export async function signOut(): Promise<void> {
+  if (!supabase) return
+  await supabase.auth.signOut()
+  window.location.reload()
+}
