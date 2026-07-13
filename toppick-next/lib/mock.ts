@@ -1,3 +1,10 @@
+import type { Sport, League, Match, Analyst, Post, MySportRecord } from './types'
+
+export const SPORTS: { id: Sport; ic: string }[] = [
+  { id: 'soccer', ic: '⚽' }, { id: 'baseball', ic: '⚾' },
+  { id: 'basketball', ic: '🏀' }, { id: 'ufc', ic: '🥊' },
+]
+
 export const LEAGUES: Record<Sport, League[]> = {
   soccer: [
     { id: 'epl', name: 'Premier League', pop: 0 },
@@ -12,4 +19,125 @@ export const LEAGUES: Record<Sport, League[]> = {
   ufc: [
     { id: 'ufc', name: 'UFC', pop: 0 },
   ],
+}
+
+export const ANALYSTS: Record<Sport, Analyst[]> = {
+  soccer: [
+    { name: 'M. Kessler', handle: '@xg_merchant', initials: 'MK', skill: 81.2, lo: 76.9, hi: 84.8, w: 288, l: 97, n: 385, starIn: ['soccer'] },
+    { name: 'L. Fontaine', handle: '@setpiece', initials: 'LF', skill: 77.1, lo: 72.0, hi: 81.4, w: 210, l: 96, n: 306, starIn: ['soccer', 'basketball'] },
+    { name: 'S. Adeyemi', handle: '@pressmap', initials: 'SA', skill: 74.3, lo: 69.4, hi: 78.6, w: 186, l: 92, n: 278, starIn: [] },
+    { name: 'P. Costa', handle: '@lowblock', initials: 'PC', skill: 71.8, lo: 66.2, hi: 76.7, w: 142, l: 74, n: 216, starIn: [] },
+    { name: 'H. Yilmaz', handle: '@halfspaces', initials: 'HY', skill: 69.9, lo: 63.8, hi: 75.3, w: 118, l: 63, n: 181, starIn: [] },
+  ],
+  baseball: [
+    { name: 'D. Park', handle: '@sabr_park', initials: 'DP', skill: 78.4, lo: 75.0, hi: 81.3, w: 402, l: 198, n: 600, starIn: ['baseball'] },
+    { name: 'T. Nakamura', handle: '@parkfactor', initials: 'TN', skill: 74.9, lo: 70.8, hi: 78.4, w: 255, l: 140, n: 395, starIn: ['baseball'] },
+    { name: 'C. Rivera', handle: '@spinrate', initials: 'CR', skill: 71.6, lo: 66.0, hi: 76.5, w: 150, l: 81, n: 231, starIn: [] },
+    { name: 'J. Whitfield', handle: '@bullpenlog', initials: 'JW', skill: 68.7, lo: 62.4, hi: 74.2, w: 112, l: 64, n: 176, starIn: [] },
+    { name: 'K. Ito', handle: '@woba_ito', initials: 'KI', skill: 66.1, lo: 59.3, hi: 72.3, w: 94, l: 57, n: 151, starIn: [] },
+  ],
+  basketball: [
+    { name: 'L. Fontaine', handle: '@setpiece', initials: 'LF', skill: 79.5, lo: 74.2, hi: 83.7, w: 198, l: 84, n: 282, starIn: ['soccer', 'basketball'] },
+    { name: 'A. Mensah', handle: '@paceandspace', initials: 'AM', skill: 76.2, lo: 71.1, hi: 80.5, w: 176, l: 83, n: 259, starIn: ['basketball'] },
+    { name: 'V. Petrov', handle: '@clutchnet', initials: 'VP', skill: 72.4, lo: 66.5, hi: 77.6, w: 131, l: 70, n: 201, starIn: [] },
+    { name: 'R. Chen', handle: '@fourfactors', initials: 'RC', skill: 69.3, lo: 62.8, hi: 75.1, w: 104, l: 60, n: 164, starIn: [] },
+    { name: 'B. Okoro', handle: '@rimprotect', initials: 'BO', skill: 65.8, lo: 58.6, hi: 72.4, w: 82, l: 52, n: 134, starIn: [] },
+  ],
+  ufc: [
+    { name: 'R. Okafor', handle: '@grapplemath', initials: 'RO', skill: 79.8, lo: 74.1, hi: 84.2, w: 141, l: 52, n: 193, starIn: ['ufc'] },
+    { name: 'A. Silva', handle: '@octagoniq', initials: 'AS', skill: 73.2, lo: 66.1, hi: 79.0, w: 88, l: 41, n: 129, starIn: ['ufc'] },
+    { name: 'M. Duarte', handle: '@fightiq', initials: 'MD', skill: 70.5, lo: 63.1, hi: 76.9, w: 76, l: 38, n: 114, starIn: [] },
+    { name: 'E. Kaya', handle: '@clinchwork', initials: 'EK', skill: 67.4, lo: 59.5, hi: 74.4, w: 61, l: 34, n: 95, starIn: [] },
+    { name: 'N. Petrosyan', handle: '@southpawn', initials: 'NP', skill: 64.2, lo: 55.8, hi: 71.9, w: 49, l: 30, n: 79, starIn: [] },
+  ],
+}
+
+export const mockMatches: Match[] = [
+  { id: 1, sport: 'soccer', leagueId: 'ucl', status: 'live', clock: "67'",
+    a: { name: 'Real Madrid', abbr: 'RMA', color: '#FEBE10' }, b: { name: 'Man City', abbr: 'MCI', color: '#6CABDD' },
+    votesA: 22140, votesB: 20890, myPick: null,
+    star: { con: 44, n: 41, picks: [{ analystIdx: 0, side: 'b', conf: '62%' }, { analystIdx: 1, side: 'b', conf: '57%' }, { analystIdx: 2, side: 'a', conf: '54%' }] } },
+  { id: 2, sport: 'soccer', leagueId: 'ucl', status: 'scheduled', clock: 'in 4h',
+    a: { name: 'Arsenal', abbr: 'ARS', color: '#EF3340' }, b: { name: 'Bayern', abbr: 'FCB', color: '#DC052D' },
+    votesA: 12481, votesB: 11020, myPick: null,
+    star: { con: 58, n: 38, picks: [{ analystIdx: 0, side: 'a', conf: '60%' }, { analystIdx: 3, side: 'a', conf: '55%' }] } },
+  { id: 3, sport: 'soccer', leagueId: 'uel', status: 'scheduled', clock: 'in 7h',
+    a: { name: 'Roma', abbr: 'ROM', color: '#8E1F2F' }, b: { name: 'Porto', abbr: 'POR', color: '#00428C' },
+    votesA: 6210, votesB: 5480, myPick: null,
+    star: { con: 52, n: 29, picks: [{ analystIdx: 1, side: 'a', conf: '53%' }, { analystIdx: 4, side: 'b', conf: '56%' }] } },
+  { id: 4, sport: 'soccer', leagueId: 'uecl', status: 'scheduled', clock: 'Tomorrow',
+    a: { name: 'Fiorentina', abbr: 'FIO', color: '#5A2D82' }, b: { name: 'AZ Alkmaar', abbr: 'AZ', color: '#D0021B' },
+    votesA: 2410, votesB: 1890, myPick: null,
+    star: { con: 63, n: 18, picks: [{ analystIdx: 2, side: 'a', conf: '61%' }] } },
+  { id: 5, sport: 'baseball', leagueId: 'mlb', status: 'live', clock: '6th',
+    a: { name: 'Dodgers', abbr: 'LAD', color: '#005A9C' }, b: { name: 'Yankees', abbr: 'NYY', color: '#8895a7' },
+    votesA: 18720, votesB: 16330, myPick: null,
+    star: { con: 64, n: 52, picks: [{ analystIdx: 0, side: 'a', conf: '58%' }, { analystIdx: 1, side: 'a', conf: '61%' }, { analystIdx: 2, side: 'b', conf: '52%' }] } },
+  { id: 6, sport: 'baseball', leagueId: 'mlb', status: 'scheduled', clock: 'in 3h',
+    a: { name: 'Braves', abbr: 'ATL', color: '#CE1141' }, b: { name: 'Mets', abbr: 'NYM', color: '#FF5910' },
+    votesA: 8140, votesB: 7660, myPick: null,
+    star: { con: 55, n: 47, picks: [{ analystIdx: 0, side: 'a', conf: '56%' }, { analystIdx: 3, side: 'b', conf: '53%' }] } },
+  { id: 7, sport: 'baseball', leagueId: 'kbo', status: 'scheduled', clock: 'Tomorrow',
+    a: { name: 'LG Twins', abbr: 'LG', color: '#C30452' }, b: { name: 'Doosan Bears', abbr: 'OB', color: '#131230' },
+    votesA: 4410, votesB: 3980, myPick: null,
+    star: { con: 59, n: 23, picks: [{ analystIdx: 1, side: 'a', conf: '57%' }, { analystIdx: 4, side: 'a', conf: '54%' }] } },
+  { id: 8, sport: 'baseball', leagueId: 'npb', status: 'scheduled', clock: 'in 9h',
+    a: { name: 'Hanshin Tigers', abbr: 'HAN', color: '#FFDD00' }, b: { name: 'Yomiuri Giants', abbr: 'YOM', color: '#F97709' },
+    votesA: 3220, votesB: 3540, myPick: null,
+    star: { con: 47, n: 19, picks: [{ analystIdx: 2, side: 'b', conf: '55%' }] } },
+  { id: 9, sport: 'basketball', leagueId: 'nba', status: 'live', clock: 'Q3',
+    a: { name: 'Celtics', abbr: 'BOS', color: '#007A33' }, b: { name: 'Nuggets', abbr: 'DEN', color: '#0E2240' },
+    votesA: 15310, votesB: 13890, myPick: null,
+    star: { con: 57, n: 36, picks: [{ analystIdx: 0, side: 'a', conf: '59%' }, { analystIdx: 1, side: 'a', conf: '56%' }, { analystIdx: 3, side: 'b', conf: '52%' }] } },
+  { id: 10, sport: 'basketball', leagueId: 'nba', status: 'scheduled', clock: 'in 2h',
+    a: { name: 'Lakers', abbr: 'LAL', color: '#552583' }, b: { name: 'Thunder', abbr: 'OKC', color: '#007AC1' },
+    votesA: 11470, votesB: 14020, myPick: null,
+    star: { con: 38, n: 33, picks: [{ analystIdx: 1, side: 'b', conf: '63%' }, { analystIdx: 2, side: 'b', conf: '58%' }] } },
+  { id: 11, sport: 'basketball', leagueId: 'euro', status: 'scheduled', clock: 'in 6h',
+    a: { name: 'Fenerbahce', abbr: 'FEN', color: '#FFDE00' }, b: { name: 'Olympiacos', abbr: 'OLY', color: '#D6001C' },
+    votesA: 4380, votesB: 4110, myPick: null,
+    star: { con: 51, n: 21, picks: [{ analystIdx: 0, side: 'a', conf: '54%' }] } },
+  { id: 12, sport: 'basketball', leagueId: 'kbl', status: 'scheduled', clock: 'Tomorrow',
+    a: { name: 'Seoul SK', abbr: 'SK', color: '#E4002B' }, b: { name: 'Busan KCC', abbr: 'KCC', color: '#003876' },
+    votesA: 1820, votesB: 1540, myPick: null,
+    star: { con: 60, n: 12, picks: [{ analystIdx: 4, side: 'a', conf: '57%' }] } },
+  { id: 13, sport: 'ufc', leagueId: 'ppv', status: 'scheduled', clock: 'in 2h',
+    a: { name: 'Volkanovski', abbr: 'FEA', color: '#8895a7' }, b: { name: 'Topuria', abbr: 'FEA', color: '#D64550' },
+    votesA: 5210, votesB: 9840, myPick: null,
+    star: { con: 23, n: 31, picks: [{ analystIdx: 0, side: 'b', conf: '68%' }, { analystIdx: 1, side: 'b', conf: '64%' }, { analystIdx: 2, side: 'b', conf: '59%' }] } },
+  { id: 14, sport: 'ufc', leagueId: 'ppv', status: 'scheduled', clock: 'in 90m',
+    a: { name: 'Adesanya', abbr: 'MID', color: '#111827' }, b: { name: 'Du Plessis', abbr: 'MID', color: '#4A6FA5' },
+    votesA: 8110, votesB: 6540, myPick: null,
+    star: { con: 46, n: 28, picks: [{ analystIdx: 0, side: 'b', conf: '55%' }, { analystIdx: 3, side: 'a', conf: '53%' }] } },
+  { id: 15, sport: 'ufc', leagueId: 'fn', status: 'scheduled', clock: 'Sat',
+    a: { name: 'Cannonier', abbr: 'MID', color: '#7A1F1F' }, b: { name: 'Imavov', abbr: 'MID', color: '#2C4770' },
+    votesA: 2940, votesB: 3310, myPick: null,
+    star: { con: 41, n: 16, picks: [{ analystIdx: 1, side: 'b', conf: '58%' }] } },
+  { id: 16, sport: 'ufc', leagueId: 'dwcs', status: 'scheduled', clock: 'Tue',
+    a: { name: 'Reyes', abbr: 'LHW', color: '#5B4A8A' }, b: { name: 'Da Silva', abbr: 'LHW', color: '#1F6E5B' },
+    votesA: 880, votesB: 1040, myPick: null,
+    star: { con: 44, n: 9, picks: [{ analystIdx: 4, side: 'b', conf: '56%' }] } },
+]
+
+export const mockPosts: Post[] = [
+  { id: 1, matchId: 1, author: 'M. Kessler', starIn: ['soccer'], upvotes: 214,
+    body: "City's press is baiting the left back all match. If the wide overloads keep landing, that half-space stays open. Consensus has this too even — it's undervaluing the away side." },
+  { id: 2, matchId: 1, author: 'touchline_ted', starIn: [], upvotes: 41,
+    body: "Home crowd factor is real here. I'm with the consensus lean but it's closer than the bar shows." },
+  { id: 3, matchId: 5, author: 'D. Park', starIn: ['baseball'], upvotes: 176,
+    body: 'Bullpen usage over the last three games matters more than the starter tonight. The crowd keeps pricing the name on the mound, not the arms behind him.' },
+  { id: 4, matchId: 13, author: 'cornerwork', starIn: [], upvotes: 88,
+    body: "Everyone's on the finish but check the pace numbers — this goes to the judges more often than the crowd thinks. Consensus moved 8% in an hour." },
+  { id: 5, matchId: 9, author: 'A. Mensah', starIn: ['basketball'], upvotes: 64,
+    body: "Denver's bench net rating in Q3 has been brutal for two weeks. If the starters sit early, the crowd's lean flips fast." },
+]
+
+export const YOU: { initials: string; name: string; handle: string; bySport: Record<Sport, MySportRecord> } = {
+  initials: 'JS', name: 'J. Sung', handle: '@you',
+  bySport: {
+    soccer: { rank: 83, skill: 62.4, lo: 57.9, hi: 66.6, w: 238, l: 174, n: 412, pct: '1.6%' },
+    baseball: { rank: 412, skill: 54.1, lo: 48.0, hi: 59.8, w: 96, l: 81, n: 177, pct: '8.9%' },
+    basketball: { rank: 655, skill: 51.3, lo: 44.2, hi: 58.1, w: 61, l: 57, n: 118, pct: '14.2%' },
+    ufc: { rank: 998, skill: 49.8, lo: 41.2, hi: 58.1, w: 38, l: 39, n: 77, pct: '22.7%' },
+  },
 }
