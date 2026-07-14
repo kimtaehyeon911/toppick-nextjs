@@ -5,12 +5,31 @@ const KEY = process.env.SPORTS_API_KEY || '3'
 const BASE = `https://www.thesportsdb.com/api/v1/json/${KEY}`
 
 // slug must match lib/mock.ts LEAGUES ids.
+// slug must match lib/mock.ts LEAGUES ids.
+// Ordered by popularity in the US (primary market) / Korea (secondary).
 const LEAGUES = {
-  soccer:   [{ id: '4328', name: 'Premier League', slug: 'epl' },
-             { id: '4335', name: 'La Liga',        slug: 'laliga' }],
-  baseball: [{ id: '4424', name: 'MLB',            slug: 'mlb' }],
-  basketball: [{ id: '4387', name: 'NBA',          slug: 'nba' }],
-  ufc:      [{ id: '4443', name: 'UFC',            slug: 'ufc' }],
+  football: [
+    { id: '4391', name: 'NFL',             slug: 'nfl' },
+  ],
+  basketball: [
+    { id: '4387', name: 'NBA',             slug: 'nba' },
+    { id: '4472', name: 'KBL',             slug: 'kbl' },
+  ],
+  baseball: [
+    { id: '4424', name: 'MLB',             slug: 'mlb' },
+    { id: '4830', name: 'KBO',             slug: 'kbo' },
+    { id: '4425', name: 'NPB',             slug: 'npb' },
+  ],
+  soccer: [
+    { id: '4328', name: 'Premier League',  slug: 'epl' },
+    { id: '4335', name: 'La Liga',         slug: 'laliga' },
+    { id: '4331', name: 'Bundesliga',      slug: 'bundesliga' },
+    { id: '4332', name: 'Serie A',         slug: 'seriea' },
+    { id: '4346', name: 'MLS',             slug: 'mls' },
+  ],
+  ufc: [
+    { id: '4443', name: 'UFC',             slug: 'ufc' },
+  ],
 }
 
 const PALETTE = ['#EF3340', '#6CABDD', '#005A9C', '#A50044', '#FEBE10', '#4A6FA5', '#C30452', '#131230', '#8895a7', '#D64550']

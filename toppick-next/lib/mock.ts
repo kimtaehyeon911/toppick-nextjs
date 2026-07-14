@@ -1,20 +1,30 @@
 import type { Sport, League, Match, Analyst, Post, MySportRecord } from './types'
 
 export const SPORTS: { id: Sport; ic: string }[] = [
-  { id: 'soccer', ic: '⚽' }, { id: 'baseball', ic: '⚾' },
-  { id: 'basketball', ic: '🏀' }, { id: 'ufc', ic: '🥊' },
+  { id: 'football', ic: '🏈' }, { id: 'basketball', ic: '🏀' },
+  { id: 'baseball', ic: '⚾' }, { id: 'soccer', ic: '⚽' },
+  { id: 'ufc', ic: '🥊' },
 ]
 
 export const LEAGUES: Record<Sport, League[]> = {
-  soccer: [
-    { id: 'epl', name: 'Premier League', pop: 0 },
-    { id: 'laliga', name: 'La Liga', pop: 0 },
-  ],
-  baseball: [
-    { id: 'mlb', name: 'MLB', pop: 0 },
+  football: [
+    { id: 'nfl', name: 'NFL', pop: 0 },
   ],
   basketball: [
     { id: 'nba', name: 'NBA', pop: 0 },
+    { id: 'kbl', name: 'KBL', pop: 0 },
+  ],
+  baseball: [
+    { id: 'mlb', name: 'MLB', pop: 0 },
+    { id: 'kbo', name: 'KBO', pop: 0 },
+    { id: 'npb', name: 'NPB', pop: 0 },
+  ],
+  soccer: [
+    { id: 'epl', name: 'Premier League', pop: 0 },
+    { id: 'laliga', name: 'La Liga', pop: 0 },
+    { id: 'bundesliga', name: 'Bundesliga', pop: 0 },
+    { id: 'seriea', name: 'Serie A', pop: 0 },
+    { id: 'mls', name: 'MLS', pop: 0 },
   ],
   ufc: [
     { id: 'ufc', name: 'UFC', pop: 0 },
@@ -22,6 +32,13 @@ export const LEAGUES: Record<Sport, League[]> = {
 }
 
 export const ANALYSTS: Record<Sport, Analyst[]> = {
+  football: [
+    { name: 'T. Brady Jr.', handle: '@epa_merchant', initials: 'TB', skill: 80.1, lo: 75.4, hi: 84.0, w: 210, l: 88, n: 298, starIn: ['football'] },
+    { name: 'K. Wolfe', handle: '@dvoa_watch', initials: 'KW', skill: 76.5, lo: 71.2, hi: 81.0, w: 168, l: 79, n: 247, starIn: ['football'] },
+    { name: 'J. Ramirez', handle: '@redzone_iq', initials: 'JR', skill: 72.8, lo: 66.9, hi: 77.9, w: 124, l: 66, n: 190, starIn: [] },
+    { name: 'S. Njoku', handle: '@trenchwar', initials: 'SN', skill: 69.4, lo: 62.9, hi: 75.2, w: 98, l: 57, n: 155, starIn: [] },
+    { name: 'M. Halloran', handle: '@clockmgmt', initials: 'MH', skill: 66.0, lo: 58.7, hi: 72.6, w: 77, l: 49, n: 126, starIn: [] },
+  ],
   soccer: [
     { name: 'M. Kessler', handle: '@xg_merchant', initials: 'MK', skill: 81.2, lo: 76.9, hi: 84.8, w: 288, l: 97, n: 385, starIn: ['soccer'] },
     { name: 'L. Fontaine', handle: '@setpiece', initials: 'LF', skill: 77.1, lo: 72.0, hi: 81.4, w: 210, l: 96, n: 306, starIn: ['soccer', 'basketball'] },
@@ -139,5 +156,6 @@ export const YOU: { initials: string; name: string; handle: string; bySport: Rec
     baseball: { rank: 412, skill: 54.1, lo: 48.0, hi: 59.8, w: 96, l: 81, n: 177, pct: '8.9%' },
     basketball: { rank: 655, skill: 51.3, lo: 44.2, hi: 58.1, w: 61, l: 57, n: 118, pct: '14.2%' },
     ufc: { rank: 998, skill: 49.8, lo: 41.2, hi: 58.1, w: 38, l: 39, n: 77, pct: '22.7%' },
+    football: { rank: 540, skill: 52.7, lo: 46.1, hi: 59.0, w: 74, l: 68, n: 142, pct: '11.4%' },
   },
 }

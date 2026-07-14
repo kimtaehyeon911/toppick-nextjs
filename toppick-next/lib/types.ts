@@ -1,4 +1,4 @@
-export type Sport = 'soccer' | 'baseball' | 'basketball' | 'ufc'
+export type Sport = 'soccer' | 'baseball' | 'basketball' | 'ufc' | 'football'
 export type Side = 'a' | 'b'
 
 export interface Team { name: string; abbr: string; color: string }

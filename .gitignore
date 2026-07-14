@@ -1,2 +1,4 @@
-﻿supabase/functions/
+﻿node_modules/
+.next/
+supabase/functions/
 supabase/functions.bak/
