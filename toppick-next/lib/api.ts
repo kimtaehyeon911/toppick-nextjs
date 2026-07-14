@@ -47,9 +47,14 @@ const EMPTY_STAR: StarBlock = { con: 50, n: 0, picks: [] }
 
 export async function listMatches(): Promise<Match[]> {
   if (!supabase) return demoMatches
+// Finished games stay visible for 3 days, then drop off the board.
+  // They remain in the DB — scoring and track records are unaffected.
+  const cutoff = new Date(Date.now() - 3 * 86400e3).toISOString()
+
   const { data: rows, error } = await supabase
     .from('matches')
     .select('id, sport, league, status, clock, team_a, team_b, result')
+    .gte('starts_at', cutoff)
     .order('starts_at', { ascending: true })
   if (error || !rows) { console.warn(error); return demoMatches }
 

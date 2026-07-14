@@ -424,3 +424,29 @@ display:flex;align-items:center;gap:10px}
   font-size: 13px; font-weight: 600; cursor: pointer;
 }
 .signin-btn:hover { color: #e6edf3; border-color: rgba(230, 237, 243, .4); }
+
+/* ---- phase tabs (upcoming / live / results) ---- */
+.phase-tabs {
+  display: flex; gap: 6px; margin-bottom: 18px;
+}
+.phase-tabs button {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px;
+  background: none; color: #8895a7;
+  border: 1px solid rgba(136, 149, 167, .18);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.phase-tabs button:hover { color: #e6edf3; }
+.phase-tabs button.on {
+  background: rgba(255, 138, 0, .1);
+  border-color: rgba(255, 138, 0, .4);
+  color: #ff8a00;
+}
+.phase-n {
+  padding: 1px 6px; border-radius: 999px;
+  background: rgba(136, 149, 167, .16);
+  font-size: 11px; font-weight: 700;
+}
+.phase-tabs button.on .phase-n {
+  background: rgba(255, 138, 0, .2); color: #ff8a00;
+}
