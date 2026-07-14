@@ -450,3 +450,53 @@ display:flex;align-items:center;gap:10px}
 .phase-tabs button.on .phase-n {
   background: rgba(255, 138, 0, .2); color: #ff8a00;
 }
+/* ---- my picks ---- */
+.mp-card { margin-bottom: 20px; }
+.mp-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.mp-rec { font-size: 13px; color: #8895a7; }
+.mp-rec em { margin-left: 8px; font-style: normal; color: #e6edf3; font-weight: 700; }
+.mp-empty { font-size: 13px; color: #8895a7; padding: 6px 0 2px; }
+
+.mp-list { list-style: none; margin: 0; padding: 0; }
+.mp-row {
+  display: grid;
+  grid-template-columns: 8px 1fr auto auto 56px;
+  align-items: center; gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(136, 149, 167, .1);
+}
+.mp-row:first-child { border-top: 0; }
+.mp-dot { width: 8px; height: 8px; border-radius: 50%; }
+.mp-teams { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.mp-teams b {
+  font-size: 14px; color: #e6edf3;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mp-vs { font-size: 12px; color: #8895a7; }
+.mp-league { font-size: 11px; color: #8895a7; letter-spacing: .04em; }
+
+.mp-state {
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; letter-spacing: .03em;
+}
+.mp-row.open .mp-state { background: rgba(136, 149, 167, .14); color: #8895a7; }
+.mp-row.hit  .mp-state { background: rgba(52, 199, 123, .14); color: #34c77b; }
+.mp-row.miss .mp-state { background: rgba(214, 69, 80, .14);  color: #d64550; }
+
+.mp-skill { text-align: right; font-size: 13px; color: #8895a7; }
+.mp-row.hit  .mp-skill { color: #34c77b; }
+.mp-row.miss .mp-skill { color: #d64550; }
+
+.mp-note {
+  margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid rgba(136, 149, 167, .1);
+  font-size: 12px; color: #8895a7; line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .mp-row { grid-template-columns: 8px 1fr auto; }
+  .mp-league, .mp-skill { display: none; }
+}

@@ -207,3 +207,63 @@ export async function signOut(): Promise<void> {
   await supabase.auth.signOut()
   window.location.reload()
 }
+// ---------- my picks (the feedback loop) ----------
+// A prediction market with no way to see whether you were right is half a
+// product. Skill scores stay empty until a match clears the 30-vote floor
+// (migration 0006), but correctness is knowable the moment a game resolves.
+
+export type MyPick = {
+  matchId: number
+  sport: Sport
+  league: string
+  startsAt: string
+  status: 'scheduled' | 'live' | 'final'
+  teamA: { name: string; abbr: string; color: string }
+  teamB: { name: string; abbr: string; color: string }
+  side: Side
+  result: Side | null
+  correct: boolean | null     // null = not resolved yet
+  skill: number | null        // null = not scored (crowd too small)
+}
+
+export async function listMyPicks(): Promise<MyPick[]> {
+  if (!supabase) return []
+  const uid = (await supabase.auth.getSession()).data.session?.user.id
+  if (!uid) return []
+
+  const { data, error } = await supabase
+    .from('picks')
+    .select(`
+      id, side, match_id,
+      matches ( id, sport, league, starts_at, status, team_a, team_b, result )
+    `)
+    .eq('user_id', uid)
+    .order('created_at', { ascending: false })
+
+  if (error || !data) { console.warn(error); return [] }
+
+  // pick_scores is RLS-gated to the caller's own rows
+  const { data: scores } = await supabase
+    .from('pick_scores')
+    .select('pick_id, skill')
+  const skillMap = new Map((scores ?? []).map(s => [s.pick_id, Number(s.skill)]))
+
+  return data.flatMap((r: any) => {
+    const m = r.matches
+    if (!m) return []
+    const result = (m.result ?? null) as Side | null
+    return [{
+      matchId: m.id,
+      sport: m.sport as Sport,
+      league: String(m.league),
+      startsAt: m.starts_at,
+      status: m.status,
+      teamA: { name: m.team_a.name, abbr: m.team_a.abbr, color: m.team_a.color },
+      teamB: { name: m.team_b.name, abbr: m.team_b.abbr, color: m.team_b.color },
+      side: r.side as Side,
+      result,
+      correct: result ? r.side === result : null,
+      skill: skillMap.get(r.id) ?? null,
+    }]
+  })
+}
