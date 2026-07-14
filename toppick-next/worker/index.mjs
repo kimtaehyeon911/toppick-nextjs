@@ -19,7 +19,8 @@ const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 if (!url || !key) { console.error('Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY'); process.exit(1) }
 const db = createClient(url, key)
 
-const SPORTS = ['soccer', 'baseball', 'basketball', 'ufc']
+// order = ingest priority (US-first)
+const SPORTS = ['football', 'basketball', 'baseball', 'soccer', 'ufc']
 const mode = process.argv[2] ?? 'ingest'
 
 // ---------- ingest: upsert upcoming/live fixtures ----------
