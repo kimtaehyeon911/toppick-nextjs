@@ -6,7 +6,7 @@ const BASE = `https://www.thesportsdb.com/api/v1/json/${KEY}`
 
 // How far ahead to ingest. Season endpoints return the whole calendar;
 // anything beyond this window is noise for a prediction market.
-const HORIZON_DAYS = 21
+const HORIZON_DAYS = 50
 
 // slug must match lib/mock.ts LEAGUES ids.
 // Ordered by popularity in the US (primary market) / Korea (secondary).
@@ -95,14 +95,32 @@ function withinHorizon(m) {
 
 export async function fetchFixtures(sport) {
   const out = []
+  const seen = new Set()
+
   for (const lg of LEAGUES[sport] ?? []) {
-    try {
-      const data = await getJSON(`eventsseason.php?id=${lg.id}&s=${lg.season}`)
-      for (const ev of data.events ?? []) {
-        const m = mapEvent(ev, lg.slug)
-        if (m && m.status !== 'final' && withinHorizon(m)) out.push(m)
+    // Two endpoints, merged:
+    //   eventsnextleague → next games for leagues currently IN SEASON
+    //   eventsseason     → opening fixtures for leagues NOT YET started
+    // (free tier caps each at ~5 events; ext_id upsert dedupes overlap)
+    const paths = [
+      `eventsnextleague.php?id=${lg.id}`,
+      `eventsseason.php?id=${lg.id}&s=${lg.season}`,
+    ]
+
+    for (const path of paths) {
+      try {
+        const data = await getJSON(path)
+        for (const ev of data.events ?? []) {
+          const m = mapEvent(ev, lg.slug)
+          if (!m || m.status === 'final' || !withinHorizon(m)) continue
+          if (seen.has(m.extId)) continue
+          seen.add(m.extId)
+          out.push(m)
+        }
+      } catch (e) {
+        console.error(`[provider] ${sport}/${lg.name} ${path.split('.')[0]}:`, e.message)
       }
-    } catch (e) { console.error(`[provider] fixtures ${sport}/${lg.name}:`, e.message) }
+    }
   }
   return out
 }
