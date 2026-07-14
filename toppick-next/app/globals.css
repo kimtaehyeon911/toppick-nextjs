@@ -500,3 +500,4 @@ display:flex;align-items:center;gap:10px}
   .mp-row { grid-template-columns: 8px 1fr auto; }
   .mp-league, .mp-skill { display: none; }
 }
+.big.dim, .v.dim { color: #8895a7; opacity: .5; }

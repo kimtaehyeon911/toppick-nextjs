@@ -267,3 +267,53 @@ export async function listMyPicks(): Promise<MyPick[]> {
     }]
   })
 }
+// ---------- skill (real, from user_skill view) ----------
+// The product's whole claim is "one number that can't be gamed". Showing a
+// mock number here would undermine that. Empty is honest; fake is not.
+
+export type SkillRow = {
+  sport: Sport
+  n: number
+  wins: number
+  losses: number
+  score: number      // display_score (50 = crowd-level)
+  lo: number
+  hi: number
+}
+
+export type SkillSummary = {
+  bySport: SkillRow[]
+  overall: SkillRow | null   // the sport with the most resolved picks
+  totalN: number
+}
+
+export async function getSkill(): Promise<SkillSummary> {
+  const empty: SkillSummary = { bySport: [], overall: null, totalN: 0 }
+  if (!supabase) return empty
+
+  const uid = (await supabase.auth.getSession()).data.session?.user.id
+  if (!uid) return empty
+
+  // user_skill is grouped by (user_id, sport); RLS limits rows to the caller
+  const { data, error } = await supabase
+    .from('user_skill')
+    .select('sport, n, wins, losses, display_score, display_lo, display_hi')
+    .eq('user_id', uid)
+
+  if (error || !data?.length) return empty
+
+  const bySport: SkillRow[] = data.map((r: any) => ({
+    sport: r.sport as Sport,
+    n: Number(r.n),
+    wins: Number(r.wins),
+    losses: Number(r.losses),
+    score: Number(r.display_score),
+    lo: Number(r.display_lo),
+    hi: Number(r.display_hi),
+  }))
+
+  const overall = bySport.reduce((best, r) => (!best || r.n > best.n ? r : best),
+    null as SkillRow | null)
+
+  return { bySport, overall, totalN: bySport.reduce((s, r) => s + r.n, 0) }
+}

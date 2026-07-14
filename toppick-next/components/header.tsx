@@ -5,17 +5,19 @@ import { useState, useEffect } from 'react'
 import { LANGS } from '@/lib/i18n'
 import { useApp } from './providers'
 import { Badge } from './views'
-import { getAuthState, signInWithGoogle, hasBackend } from '@/lib/api'
+import { getAuthState, getSkill, signInWithGoogle, hasBackend } from '@/lib/api'
 
 export function Header() {
   const { lang, setLang, t, myStars } = useApp()
   const [open, setOpen] = useState(false)
   const [anon, setAnon] = useState(false)
+  const [score, setScore] = useState<number | null>(null)
   const path = usePathname()
 
-  useEffect(() => {
+useEffect(() => {
     if (!hasBackend) return
     getAuthState().then(s => setAnon(s.isAnonymous)).catch(() => {})
+    getSkill().then(s => setScore(s.overall?.score ?? null)).catch(() => {})
   }, [])
 
   const links: [string, string][] = [
@@ -59,7 +61,7 @@ export function Header() {
           <div className="you-chip">
             <span className="you-badges">{[...myStars].map(sp => <Badge key={sp} sport={sp} t={t} />)}</span>
             <span className="lb">{t('you.skill', 'Skill')}</span>
-            <span className="sc mono">62.4</span>
+<span className="sc mono">{score === null ? '—' : score.toFixed(1)}</span>
             <span className="av">JS</span>
           </div>
         </div>

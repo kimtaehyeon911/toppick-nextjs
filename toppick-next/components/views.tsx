@@ -1,8 +1,9 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Match, Side, Sport, Analyst, Post } from '@/lib/types'
 import { SPORTS, LEAGUES, ANALYSTS, YOU } from '@/lib/mock'
 import { Wilson } from './ui'
+import { getSkill, hasBackend, type SkillSummary } from '@/lib/api'
 
 type T = (k: string, f: string) => string
 const ic = (s: Sport) => SPORTS.find(x => x.id === s)!.ic
@@ -306,6 +307,16 @@ export function AnalystModal({ sport, analyst, onClose, t }: { sport: Sport; ana
 
 export function ProfileView({ myStars, onToggleStar, t }: { myStars: Set<Sport>; onToggleStar: (s: Sport) => void; t: T }) {
   const scale = (v: number) => ((v - 35) / (90 - 35)) * 100
+  const [skill, setSkill] = useState<SkillSummary | null>(null)
+
+  useEffect(() => {
+    if (!hasBackend) { setSkill({ bySport: [], overall: null, totalN: 0 }); return }
+    getSkill().then(setSkill).catch(() => setSkill({ bySport: [], overall: null, totalN: 0 }))
+  }, [])
+
+  const overall = skill?.overall ?? null
+  const map = new Map((skill?.bySport ?? []).map(r => [r.sport, r]))
+
   return (
     <section className="view on">
       <div className="sec-head"><div>
@@ -313,46 +324,64 @@ export function ProfileView({ myStars, onToggleStar, t }: { myStars: Set<Sport>;
         <h1 className="h-title">{t('pf.title', 'Track record')}</h1>
         <p className="h-sub">{t('pf.sub', "One number that can't be gamed: your skill against the crowd, bounded by how much you've actually predicted.")}</p>
       </div></div>
+
       <div className="prof-grid">
         <div className="prof-hero">
           <div className="lb">{t('pf.skillscore', 'Skill Score')}</div>
-          <div className="big mono">62.4</div>
-          <div className="u">{t('pf.percentile', 'Top 6.2% overall · 412 resolved picks')}</div>
-          <div className="to-star">
-            <div className="r"><span>{t('pf.tostar', 'Distance to Star tier (Soccer)')}</span><b className="mono">+5.1</b></div>
-            <div className="pbar"><div className="f" style={{ width: '73%' }} /></div>
-            <div className="r" style={{ marginTop: 10, color: 'var(--dimmer)' }}><span>{t('pf.tostar.note', "You're inside the top 1.6% — Star tier opens at the top 1.0%.")}</span></div>
-          </div>
+
+          {overall ? (
+            <>
+              <div className="big mono">{overall.score.toFixed(1)}</div>
+              <div className="u">
+                {overall.n} {t('pf.resolved', 'resolved picks')} · {overall.wins}–{overall.losses}
+              </div>
+              <div className="to-star">
+                <div className="r">
+                  <span>{t('pf.interval', '95% interval')}</span>
+                  <b className="mono">{overall.lo.toFixed(1)} – {overall.hi.toFixed(1)}</b>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="big mono dim">—</div>
+              <div className="u">{t('pf.none', 'No resolved picks yet')}</div>
+              <div className="to-star">
+                <div className="r" style={{ color: 'var(--dimmer)' }}>
+                  <span>{t('pf.none.note', 'Your score appears once your picks resolve. Matches need 30+ picks before the crowd counts as a benchmark.')}</span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
+
         <div className="prof-side">
           <div className="stat-card">
             <h4>{t('pf.bysport', 'Skill by sport — point estimate & 95% interval')}</h4>
             {SPORTS.map(s => {
-              const d = YOU.bySport[s.id]
+              const d = map.get(s.id)
               return (
                 <div className="pm-row" key={s.id}>
                   <span className="s">{s.ic} {t('sport.' + s.id, s.id)}</span>
-                  <span className="mini-wil"><span className="t" />
-                    <span className="c" style={{ left: `${scale(d.lo)}%`, width: `${scale(d.hi) - scale(d.lo)}%` }} />
-                    <span className="p" style={{ left: `${scale(d.skill)}%` }} /></span>
-                  <span className="v">{d.skill.toFixed(1)}</span>
+                  {d ? (
+                    <>
+                      <span className="mini-wil"><span className="t" />
+                        <span className="c" style={{ left: `${scale(d.lo)}%`, width: `${scale(d.hi) - scale(d.lo)}%` }} />
+                        <span className="p" style={{ left: `${scale(d.score)}%` }} /></span>
+                      <span className="v">{d.score.toFixed(1)}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="mini-wil"><span className="t" /></span>
+                      <span className="v dim">—</span>
+                    </>
+                  )}
                 </div>)
             })}
           </div>
-          <div className="stat-card">
-            <h4>{t('pf.demo', 'Prototype demo controls')}</h4>
-            {([['baseball', t('pf.demo.bb', 'Simulate Baseball Star badge'), t('pf.demo.bb.d', "Star analysts view their own sport's Star picks for free.")],
-               ['soccer', t('pf.demo.sc', 'Simulate Soccer Star badge'), t('pf.demo.sc.d', 'Badges stack — one analyst can hold several sports.')]] as [Sport, string, string][]).map(([sp, title, desc]) => (
-              <div className="demo-row" key={sp}>
-                <div>
-                  <div className="t">{ic(sp)} <span>{title}</span></div>
-                  <div className="d">{desc}</div>
-                </div>
-                <button className={`switch ${myStars.has(sp) ? 'on' : ''}`} onClick={() => onToggleStar(sp)} />
-              </div>))}
-          </div>
         </div>
       </div>
+
       <div className="stat-card">
         <h4>{t('pf.how', 'How your Skill Score is built')}</h4>
         <p style={{ color: 'var(--dim)', fontSize: 13.5, lineHeight: 1.65 }}>
