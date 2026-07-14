@@ -4,31 +4,34 @@
 const KEY = process.env.SPORTS_API_KEY || '3'
 const BASE = `https://www.thesportsdb.com/api/v1/json/${KEY}`
 
-// slug must match lib/mock.ts LEAGUES ids.
+// How far ahead to ingest. Season endpoints return the whole calendar;
+// anything beyond this window is noise for a prediction market.
+const HORIZON_DAYS = 21
+
 // slug must match lib/mock.ts LEAGUES ids.
 // Ordered by popularity in the US (primary market) / Korea (secondary).
 const LEAGUES = {
   football: [
-    { id: '4391', name: 'NFL',             slug: 'nfl' },
+    { id: '4391', name: 'NFL',            slug: 'nfl',        season: '2026' },
   ],
   basketball: [
-    { id: '4387', name: 'NBA',             slug: 'nba' },
-    { id: '4472', name: 'KBL',             slug: 'kbl' },
+    { id: '4387', name: 'NBA',            slug: 'nba',        season: '2026-2027' },
+    { id: '4472', name: 'KBL',            slug: 'kbl',        season: '2026-2027' },
   ],
   baseball: [
-    { id: '4424', name: 'MLB',             slug: 'mlb' },
-    { id: '4830', name: 'KBO',             slug: 'kbo' },
-    { id: '4425', name: 'NPB',             slug: 'npb' },
+    { id: '4424', name: 'MLB',            slug: 'mlb',        season: '2026' },
+    { id: '4830', name: 'KBO',            slug: 'kbo',        season: '2026' },
+    { id: '4425', name: 'NPB',            slug: 'npb',        season: '2026' },
   ],
   soccer: [
-    { id: '4328', name: 'Premier League',  slug: 'epl' },
-    { id: '4335', name: 'La Liga',         slug: 'laliga' },
-    { id: '4331', name: 'Bundesliga',      slug: 'bundesliga' },
-    { id: '4332', name: 'Serie A',         slug: 'seriea' },
-    { id: '4346', name: 'MLS',             slug: 'mls' },
+    { id: '4328', name: 'Premier League', slug: 'epl',        season: '2026-2027' },
+    { id: '4335', name: 'La Liga',        slug: 'laliga',     season: '2026-2027' },
+    { id: '4331', name: 'Bundesliga',     slug: 'bundesliga', season: '2026-2027' },
+    { id: '4332', name: 'Serie A',        slug: 'seriea',     season: '2026-2027' },
+    { id: '4346', name: 'MLS',            slug: 'mls',        season: '2026' },
   ],
   ufc: [
-    { id: '4443', name: 'UFC',             slug: 'ufc' },
+    { id: '4443', name: 'UFC',            slug: 'ufc',        season: '2026' },
   ],
 }
 
@@ -54,10 +57,6 @@ function parseFighters(ev) {
 
   let a = parts[0].trim()
   const b = parts[1].trim()
-
-  // strip the event-title prefix from the left fighter:
-  //   "UFC Fight Night 281 Du Plessis" -> "Du Plessis"
-  //   "UFC 300 Pereira"                -> "Pereira"
   a = a.replace(/^UFC\s+(?:Fight\s+Night|Fight\s+Pass|on\s+\S+)?\s*\d*\s*/i, '').trim()
 
   if (!a || !b) return [null, null]
@@ -79,21 +78,29 @@ function mapEvent(ev, leagueSlug) {
     startsAt: ev.strTimestamp ?? `${ev.dateEvent}T${ev.strTime ?? '00:00:00'}Z`,
     status: done ? 'final' : live ? 'live' : 'scheduled',
     clock: live ? (ev.strProgress ?? 'LIVE') : done ? 'FT' : '',
-    teamA: { name: a, abbr: abbr(a), color: color(a) },
-    teamB: { name: b, abbr: abbr(b), color: color(b) },
+    teamA: { name: a, abbr: abbr(a), color: color(a), logo: ev.strHomeTeamBadge ?? null },
+    teamB: { name: b, abbr: abbr(b), color: color(b), logo: ev.strAwayTeamBadge ?? null },
     homeScore: ev.intHomeScore != null ? Number(ev.intHomeScore) : null,
     awayScore: ev.intAwayScore != null ? Number(ev.intAwayScore) : null,
   }
+}
+
+// Season endpoint returns the full calendar; keep only the near horizon.
+function withinHorizon(m) {
+  const t = Date.parse(m.startsAt)
+  if (Number.isNaN(t)) return false
+  const now = Date.now()
+  return t > now - 6 * 3600e3 && t < now + HORIZON_DAYS * 86400e3
 }
 
 export async function fetchFixtures(sport) {
   const out = []
   for (const lg of LEAGUES[sport] ?? []) {
     try {
-      const data = await getJSON(`eventsnextleague.php?id=${lg.id}`)
+      const data = await getJSON(`eventsseason.php?id=${lg.id}&s=${lg.season}`)
       for (const ev of data.events ?? []) {
         const m = mapEvent(ev, lg.slug)
-        if (m && m.status !== 'final') out.push(m)
+        if (m && m.status !== 'final' && withinHorizon(m)) out.push(m)
       }
     } catch (e) { console.error(`[provider] fixtures ${sport}/${lg.name}:`, e.message) }
   }
