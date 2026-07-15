@@ -152,18 +152,17 @@ export async function purchasePass(
     throw error ?? new Error('checkout failed')
   }
 
-P.Checkout.open({
-    transactionId: data.transactionId,
-    // fires when the buyer completes payment in the overlay
-    eventCallback: (ev: any) => {
-      console.log('[paddle event]', ev?.name, ev)
-      if (ev?.name === 'checkout.completed') {
-        try { P.Checkout.close() } catch (e) { console.log('close failed', e) }
-        pollForPass(kind, matchId, sport, onComplete)
-      }
-    },
+  P.Checkout.open({ transactionId: data.transactionId })
+
+  // Don't rely on Paddle's eventCallback (flaky across environments).
+  // Poll the passes table directly; when the webhook lands, close the
+  // overlay and refresh the UI. Works regardless of Paddle event quirks.
+  pollForPass(kind, matchId, sport, () => {
+    try { P.Checkout.close() } catch {}
+    onComplete?.()
   })
-  return 'redirected'
+
+  return 'redirected'  return 'redirected'
 }
 
 // The webhook may take a second or two. Poll a few times, then give up
@@ -174,7 +173,7 @@ async function pollForPass(
   sport: Sport,
   onComplete?: () => void,
 ) {
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 40; i++) {
     await new Promise(r => setTimeout(r, 500))
     const ent = await getEntitlements()
     const got = kind === 'single'
