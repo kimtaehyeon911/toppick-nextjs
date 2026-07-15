@@ -109,19 +109,46 @@ export function onConsensusChange(cb: () => void): () => void {
   return () => { supabase.removeChannel(ch) }
 }
 
-// ---------- passes ----------
-// Demo mode resolves instantly; with a backend we redirect to Stripe Checkout
-// and the webhook (service role) is the only writer of `passes`.
-export async function purchasePass(kind: 'single' | 'weekly', matchId?: number, sport: Sport = 'soccer'):
-  Promise<'unlocked' | 'redirected'> {
-  if (!supabase) return 'unlocked'
-  const uid = (await supabase.auth.getSession()).data.session?.user.id
-  if (!uid) throw new Error('no session')
-  const { data, error } = await supabase.functions.invoke('create-checkout', {
-    body: { kind, match_id: matchId ?? null, sport },
+// ---------- passes (Paddle) ----------
+// Flow: edge fn creates a Paddle transaction → Paddle.js opens the overlay
+// → on completion Paddle calls paddle-webhook (the only writer of `passes`).
+// The frontend never writes passes directly.
+
+let paddleReady = false
+
+function initPaddle(): any {
+  const P = (window as any).Paddle
+  if (!P) return null
+  if (!paddleReady) {
+    if (process.env.NEXT_PUBLIC_PADDLE_ENV === 'sandbox') P.Environment.set('sandbox')
+    P.Initialize({ token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN! })
+    paddleReady = true
+  }
+  return P
+}
+
+export async function purchasePass(
+  kind: 'single' | 'weekly',
+  matchId?: number,
+  sport: Sport = 'soccer',
+): Promise<'unlocked' | 'redirected'> {
+  if (!supabase) return 'unlocked'   // demo mode
+
+  const P = initPaddle()
+  if (!P) throw new Error('Paddle not loaded')
+
+  // ask our edge fn to create a transaction (attributes the pass to this user)
+  const { data, error } = await supabase.functions.invoke('paddle-checkout', {
+    body: { kind, sport, matchId: matchId ?? null },
   })
-  if (error || !data?.url) throw error ?? new Error('checkout failed')
-  window.location.href = data.url as string
+  if (error || !data?.transactionId) {
+    throw error ?? new Error('checkout failed')
+  }
+
+  // open Paddle's overlay against that transaction
+  P.Checkout.open({ transactionId: data.transactionId })
+
+  // the webhook writes the pass asynchronously; caller should poll/refresh
   return 'redirected'
 }
 

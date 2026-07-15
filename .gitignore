@@ -2,3 +2,8 @@
 .next/
 supabase/functions/
 supabase/functions.bak/
+
+.env.local
+.env*.local
+
+supabase/.temp/
