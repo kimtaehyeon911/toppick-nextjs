@@ -259,7 +259,7 @@ export function PayModal({ m, onClose, onBuy, t }: { m: Match; onClose: () => vo
             <span className="pr">$9.90</span>
           </button>
         </div>
-        <p className="pay-note"><b>30%</b> <span>{t('pay.note', "of pass revenue goes back to this sport's Star tier. Star analysts view their own sport's picks free.")}</span></p>
+        <p className="pay-note"><b>10%</b> <span>{t('pay.note', "of each sale is shared equally among the analysts who contributed picks. Star analysts view their own sport's picks free.")}</span></p>
       </div>
     </div>
   )
