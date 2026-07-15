@@ -12,11 +12,6 @@ export function LegalPage({
     <div className="wrap legal">
       <Link href="/" className="legal-back">← Back to Top Pick</Link>
 
-      <div className="legal-draft">
-        DRAFT — for review only. Not yet legally effective. Final wording
-        pending attorney review.
-      </div>
-
       <h1 className="legal-h1">{title}</h1>
       <p className="legal-updated">Last updated: {updated}</p>
 
