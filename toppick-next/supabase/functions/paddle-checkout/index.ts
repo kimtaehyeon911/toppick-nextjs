@@ -13,8 +13,8 @@ const PRICES: Record<string, string> = {
   single:            'pri_01kxj9mqdakk2ekx4m2wkkg0db',
   weekly_football:   'pri_01kxj9t85wr22d4bjadge5qykk',
   weekly_basketball: 'pri_01kxj9w6zpz12xspyc9qst72wb',
-  weekly_baseball:   'pri_01kxj9x005tyeatrksvb38zd51',
-  weekly_soccer:     'pri_01kxj9xhk1g914b6z285n0q62i',
+  weekly_baseball:   'pri_01kxj9x005tyeatkrsvb38zd51',
+  weekly_soccer:     'pri_01kxj9xhk1q914b6z285n0q62j',
   weekly_ufc:        'pri_01kxja1np33szk0avweq6p08sg',
 }
 
