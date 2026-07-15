@@ -152,17 +152,19 @@ export async function purchasePass(
     throw error ?? new Error('checkout failed')
   }
 
-  P.Checkout.open({
+P.Checkout.open({
     transactionId: data.transactionId,
     // fires when the buyer completes payment in the overlay
     eventCallback: (ev: any) => {
       if (ev?.name === 'checkout.completed') {
-        // webhook writes the pass async; poll passes until it lands
+        // close Paddle's overlay right away so the user lands back on our UI
+        try { P.Checkout.close() } catch {}
+        // webhook writes the pass async; poll passes until it lands, then
+        // onComplete refreshes entitlements and closes our modal
         pollForPass(kind, matchId, sport, onComplete)
       }
     },
   })
-
   return 'redirected'
 }
 
@@ -174,15 +176,14 @@ async function pollForPass(
   sport: Sport,
   onComplete?: () => void,
 ) {
-  for (let i = 0; i < 8; i++) {
-    await new Promise(r => setTimeout(r, 1000))
+  for (let i = 0; i < 12; i++) {
+    await new Promise(r => setTimeout(r, 500))
     const ent = await getEntitlements()
     const got = kind === 'single'
       ? (matchId != null && ent.singles.includes(matchId))
       : ent.weeklies.includes(sport)
     if (got) { onComplete?.(); return }
   }
-  // last resort: refresh anyway so a slightly-late webhook still reflects
   onComplete?.()
 }
 // ---------- community ----------
