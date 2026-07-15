@@ -27,6 +27,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <footer className="foot">
             <div><span className="wm" style={{ fontFamily: 'var(--disp)', fontWeight: 900, fontSize: 15 }}>TOP<b style={{ color: 'var(--brand)' }}>PICK</b></span></div>
             <div>A skill market — not a betting platform. No stakes, no odds, no payouts for outcomes. Predictions are free.</div>
+            <nav className="foot-legal">
+              <a href="/terms">Terms</a>
+              <a href="/privacy">Privacy</a>
+              <a href="/refund">Refund</a>
+              <a href="/creator-agreement">Creator Agreement</a>
+            </nav>
           </footer>
         </Providers>
       </body>
