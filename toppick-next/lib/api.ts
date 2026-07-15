@@ -131,13 +131,13 @@ export async function purchasePass(
   kind: 'single' | 'weekly',
   matchId?: number,
   sport: Sport = 'soccer',
+  onComplete?: () => void,
 ): Promise<'unlocked' | 'redirected'> {
   if (!supabase) return 'unlocked'   // demo mode
 
   const P = initPaddle()
   if (!P) throw new Error('Paddle not loaded')
 
-  // ask our edge fn to create a transaction (attributes the pass to this user)
   const { data, error } = await supabase.functions.invoke('paddle-checkout', {
     body: { kind, sport, matchId: matchId ?? null },
   })
@@ -145,13 +145,39 @@ export async function purchasePass(
     throw error ?? new Error('checkout failed')
   }
 
-  // open Paddle's overlay against that transaction
-  P.Checkout.open({ transactionId: data.transactionId })
+  P.Checkout.open({
+    transactionId: data.transactionId,
+    // fires when the buyer completes payment in the overlay
+    eventCallback: (ev: any) => {
+      if (ev?.name === 'checkout.completed') {
+        // webhook writes the pass async; poll passes until it lands
+        pollForPass(kind, matchId, sport, onComplete)
+      }
+    },
+  })
 
-  // the webhook writes the pass asynchronously; caller should poll/refresh
   return 'redirected'
 }
 
+// The webhook may take a second or two. Poll a few times, then give up
+// gracefully (the pass will still be there on next page load).
+async function pollForPass(
+  kind: 'single' | 'weekly',
+  matchId: number | undefined,
+  sport: Sport,
+  onComplete?: () => void,
+) {
+  for (let i = 0; i < 8; i++) {
+    await new Promise(r => setTimeout(r, 1000))
+    const ent = await getEntitlements()
+    const got = kind === 'single'
+      ? (matchId != null && ent.singles.includes(matchId))
+      : ent.weeklies.includes(sport)
+    if (got) { onComplete?.(); return }
+  }
+  // last resort: refresh anyway so a slightly-late webhook still reflects
+  onComplete?.()
+}
 // ---------- community ----------
 let demoPosts: Post[] = JSON.parse(JSON.stringify(mockPosts))
 
@@ -343,4 +369,40 @@ export async function getSkill(): Promise<SkillSummary> {
     null as SkillRow | null)
 
   return { bySport, overall, totalN: bySport.reduce((s, r) => s + r.n, 0) }
+}
+
+// ---------- entitlements (what passes unlock) ----------
+// The webhook writes passes asynchronously, so the client reads them back
+// to learn what it can view. Single -> that match; weekly -> that sport
+// until expiry.
+
+export type Entitlements = {
+  singles: number[]     // match_ids unlocked
+  weeklies: Sport[]     // sports unlocked (unexpired)
+}
+
+export async function getEntitlements(): Promise<Entitlements> {
+  if (!supabase) return { singles: [], weeklies: [] }
+  const uid = (await supabase.auth.getSession()).data.session?.user.id
+  if (!uid) return { singles: [], weeklies: [] }
+
+  const nowIso = new Date().toISOString()
+  const { data, error } = await supabase
+    .from('passes')
+    .select('kind, sport, match_id, expires_at')
+    .eq('user_id', uid)
+
+  if (error || !data) return { singles: [], weeklies: [] }
+
+  const singles: number[] = []
+  const weeklies: Sport[] = []
+  for (const p of data) {
+    if (p.kind === 'single' && p.match_id != null) {
+      singles.push(Number(p.match_id))
+    } else if (p.kind === 'weekly') {
+      // weekly valid only if not expired
+      if (!p.expires_at || p.expires_at > nowIso) weeklies.push(p.sport as Sport)
+    }
+  }
+  return { singles, weeklies }
 }

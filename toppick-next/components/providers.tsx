@@ -4,7 +4,7 @@
 // session-scoped lives here.
 import { createContext, useContext, useEffect, useMemo, useState, useCallback, type ReactNode } from 'react'
 import type { Match, Sport } from '@/lib/types'
-import { ensureSession, purchasePass } from '@/lib/api'
+import { ensureSession, purchasePass, getEntitlements, hasBackend } from '@/lib/api'
 import { makeT, type Lang } from '@/lib/i18n'
 import { useToast } from './ui'
 import { PayModal } from './views'
@@ -37,15 +37,19 @@ export function Providers({ children }: { children: ReactNode }) {
   const { toast, node: toastNode } = useToast()
   const t = useMemo(() => makeT(lang), [lang])
 
-  useEffect(() => { ensureSession() }, [])
+  const refreshEntitlements = useCallback(async () => {
+    if (!hasBackend) return
+    const ent = await getEntitlements()
+    setSingles(new Set(ent.singles))
+    setWeeklies(new Set(ent.weeklies))
+  }, [])
 
-  // Stripe return (?pass=success|cancelled)
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get('pass')
-    if (!q) return
-    window.history.replaceState({}, '', window.location.pathname)
-    toast(q === 'success' ? '★' : '!', q === 'success' ? 'Payment complete · Star Picks unlocked' : 'Checkout cancelled')
-  }, [toast])
+    (async () => {
+      await ensureSession()
+      await refreshEntitlements()
+    })()
+  }, [refreshEntitlements])
 
   const canView = useCallback((m: Match) =>
     myStars.has(m.sport) || weeklies.has(m.sport) || singles.has(m.id),
@@ -60,23 +64,32 @@ export function Providers({ children }: { children: ReactNode }) {
   const buy = async (kind: 'single' | 'weekly') => {
     const m = payTarget; if (!m) return
     try {
-      const r = await purchasePass(kind, kind === 'single' ? m.id : undefined, m.sport)
-      if (r === 'redirected') return
-      if (kind === 'single') setSingles(prev => new Set(prev).add(m.id))
-      else setWeeklies(prev => new Set(prev).add(m.sport))
-      setOpenPanels(prev => new Set(prev).add(m.id))
-      setPayTarget(null)
-      toast('★', kind === 'weekly'
-        ? t('toast.weekly', 'Weekly pass active — all Star picks in this sport unlocked')
-        : t('toast.single', 'Single match pass applied — Star picks unlocked'))
+      const onComplete = async () => {
+        await refreshEntitlements()
+        setOpenPanels(prev => new Set(prev).add(m.id))
+        setPayTarget(null)
+        toast('\u2605', kind === 'weekly'
+          ? t('toast.weekly', 'Weekly pass active — all Star picks in this sport unlocked')
+          : t('toast.single', 'Single match pass applied — Star picks unlocked'))
+      }
+
+      const r = await purchasePass(
+        kind, kind === 'single' ? m.id : undefined, m.sport, onComplete)
+
+      if (r === 'unlocked') {
+        if (kind === 'single') setSingles(prev => new Set(prev).add(m.id))
+        else setWeeklies(prev => new Set(prev).add(m.sport))
+        setOpenPanels(prev => new Set(prev).add(m.id))
+        setPayTarget(null)
+      }
     } catch { toast('!', 'Purchase failed') }
   }
 
   const toggleStar = useCallback((sp: Sport) => {
     setMyStars(prev => {
       const s = new Set(prev)
-      if (s.has(sp)) { s.delete(sp); toast('★', t('toast.star.off', 'Star badge removed')) }
-      else { s.add(sp); toast('★', t('toast.star.on', "Star badge on — this sport's Star picks are free for you")) }
+      if (s.has(sp)) { s.delete(sp); toast('\u2605', t('toast.star.off', 'Star badge removed')) }
+      else { s.add(sp); toast('\u2605', t('toast.star.on', "Star badge on — this sport's Star picks are free for you")) }
       return s
     })
   }, [t, toast])
