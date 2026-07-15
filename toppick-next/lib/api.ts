@@ -162,7 +162,7 @@ export async function purchasePass(
     onComplete?.()
   })
 
-  return 'redirected'  return 'redirected'
+  return 'redirected'
 }
 
 // The webhook may take a second or two. Poll a few times, then give up
