@@ -44,10 +44,28 @@ export default function CreatorAgreementPage() {
         for taxes on amounts you receive.
       </p>
 
-      <h2>6. Termination</h2>
+<h2>6. Termination</h2>
       <p>
-        Either party may end this arrangement. [PLACEHOLDER: notice period,
-        final-payout handling, and clawback terms per attorney review.]
+        <strong>Notice Period and Final Payouts:</strong> Either party may
+        terminate this agreement at any time by providing fifteen (15) days&rsquo;
+        written notice to the other party. Upon termination, any undisputed
+        finalized revenue share accrued prior to the termination date will be
+        paid out. However, Top Pick reserves the right to hold this final payout
+        for up to sixty (60) days to clear any pending user refunds or
+        chargebacks.
+      </p>
+      <h2>7. Clawback and forfeiture</h2>
+      <p>
+        Top Pick reserves the right to withhold, suspend, or clawback (reverse)
+        any revenue share payments, or deduct amounts from future payouts, if we
+        reasonably determine that:
+      </p>
+      <p>
+        (a) such revenue was generated through fraudulent activity, automated
+        bots, or manipulation of the platform;<br />
+        (b) you have materially breached the Terms of Service; or<br />
+        (c) the underlying content sales resulted in user chargebacks, disputes,
+        or refunds processed by our Merchant of Record (Paddle).
       </p>
     </LegalPage>
   )

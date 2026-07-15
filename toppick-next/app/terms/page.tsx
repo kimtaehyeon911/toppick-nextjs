@@ -62,11 +62,28 @@ export default function TermsPage() {
         acceptance.
       </p>
 
-      <h2>9. Governing law & dispute resolution</h2>
+<h2>9. Governing law & dispute resolution</h2>
       <p>
-        These terms are governed by the laws of the United States and the
-        applicable state. [PLACEHOLDER: binding arbitration clause and class-action
-        waiver to be inserted per attorney review.]
+        These terms are governed by the laws of the United States and the State
+        of Delaware.
+      </p>
+      <p>
+        <strong>Binding Arbitration and Class Action Waiver:</strong> Any
+        dispute, claim, or controversy arising out of or relating to these Terms
+        or the breach, termination, enforcement, interpretation, or validity
+        thereof, including the determination of the scope or applicability of
+        this agreement to arbitrate, shall be determined by binding arbitration
+        in Wilmington, Delaware before one arbitrator. The arbitration shall be
+        administered by JAMS pursuant to its Comprehensive Arbitration Rules and
+        Procedures.
+      </p>
+      <p>
+        <strong>CLASS ACTION WAIVER:</strong> YOU AND TOP PICK AGREE THAT EACH
+        MAY BRING CLAIMS AGAINST THE OTHER ONLY IN YOUR OR ITS INDIVIDUAL
+        CAPACITY, AND NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY PURPORTED CLASS,
+        CONSOLIDATED, OR REPRESENTATIVE PROCEEDING. The arbitrator may not
+        consolidate more than one person&rsquo;s claims and may not otherwise
+        preside over any form of a representative or class proceeding.
       </p>
     </LegalPage>
   )

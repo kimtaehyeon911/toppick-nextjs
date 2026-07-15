@@ -27,9 +27,18 @@ export default function PrivacyPage() {
         [PLACEHOLDER: privacy contact email].
       </p>
       <p>
-        [PLACEHOLDER: "Do Not Sell or Share My Personal Information" mechanism,
-        financial-incentive disclosures, and minor-protection language to be
-        finalized per attorney review.]
+        <strong>Do Not Sell or Share My Personal Information:</strong> Top Pick
+        does not sell your personal information for monetary consideration. We do
+        not offer financial incentives, or price or service differences, in
+        exchange for the retention or sale of your personal information.
+      </p>
+      <p>
+        <strong>Protection of Minors (Children&rsquo;s Privacy):</strong> Our
+        Services are strictly for individuals aged 18 and older. We do not
+        knowingly collect, maintain, or use personal information from children
+        under the age of 18. If we discover that a user under 18 has provided us
+        with personal information, we will take immediate steps to delete such
+        information and terminate the account.
       </p>
 
       <h2>4. Data retention</h2>
@@ -44,8 +53,12 @@ export default function PrivacyPage() {
         and Google (optional sign-in). Each processes data under its own terms.
       </p>
 
-      <h2>6. Contact</h2>
-      <p>[PLACEHOLDER: privacy contact email / address].</p>
+<h2>6. Contact</h2>
+      <p>
+        For any privacy-related inquiries or to exercise your rights, please
+        contact us at [privacy contact email — to be added] or via mail at
+        [business mailing address — to be added].
+      </p>
     </LegalPage>
   )
 }

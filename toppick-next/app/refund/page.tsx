@@ -27,10 +27,19 @@ export default function RefundPage() {
         expires. Partial-period refunds are not provided.
       </p>
 
-      <h2>4. How to request</h2>
+<h2>4. How to request</h2>
       <p>
-        Refund requests are handled through Paddle.com, our Merchant of Record.
-        [PLACEHOLDER: support contact and request window per attorney review.]
+        <strong>Refund Request Window and Process:</strong> To request a refund
+        for an eligible cancelled match (as defined in Section 2), you must
+        contact us at [support contact email — to be added] within seven (7) days
+        of the official announcement of the match cancellation.
+      </p>
+      <p>
+        All valid refunds will be processed through Paddle.com, our Merchant of
+        Record. Please allow 5&ndash;10 business days for the refund to reflect on
+        your original payment method, subject to Paddle&rsquo;s processing times
+        and your bank&rsquo;s policies. Refund requests made outside of this
+        7-day window will not be honored.
       </p>
     </LegalPage>
   )
