@@ -1,10 +1,8 @@
 import type { Metadata } from 'next'
 import { Providers } from '@/components/providers'
 import { Header } from '@/components/header'
+import { ConsentGate } from '@/components/consent-gate'
 import './globals.css'
-
-// Fonts load via <link> for build portability. Optional upgrade: next/font/google
-// (self-hosted, zero layout shift) — swap when building in a network-open env.
 
 export const metadata: Metadata = {
   title: { default: 'Top Pick — Skill Market for Sports Predictions', template: '%s · Top Pick' },
@@ -23,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>
           <Header />
+          <ConsentGate />
           {children}
           <footer className="foot">
             <div><span className="wm" style={{ fontFamily: 'var(--disp)', fontWeight: 900, fontSize: 15 }}>TOP<b style={{ color: 'var(--brand)' }}>PICK</b></span></div>

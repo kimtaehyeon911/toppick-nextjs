@@ -413,3 +413,40 @@ export async function getEntitlements(): Promise<Entitlements> {
   }
   return { singles, weeklies }
 }
+// ---------- consent (clickwrap) ----------
+// Active, versioned consent stored server-side. When TERMS_VERSION bumps,
+// users are re-prompted. This is the provable record attorneys asked for.
+
+export const TERMS_VERSION = '2026-07-15'
+
+export async function getConsent(): Promise<{ agreed: boolean }> {
+  if (!supabase) return { agreed: true }   // demo mode: don't block
+  const uid = (await supabase.auth.getSession()).data.session?.user.id
+  if (!uid) return { agreed: false }
+
+  const { data } = await supabase
+    .from('profiles')
+    .select('agreed_version, age_confirmed')
+    .eq('id', uid)
+    .maybeSingle()
+
+  const agreed = Boolean(
+    data?.age_confirmed && data?.agreed_version === TERMS_VERSION)
+  return { agreed }
+}
+
+export async function recordConsent(): Promise<void> {
+  if (!supabase) return
+  const uid = (await supabase.auth.getSession()).data.session?.user.id
+  if (!uid) throw new Error('no session')
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      agreed_at: new Date().toISOString(),
+      agreed_version: TERMS_VERSION,
+      age_confirmed: true,
+    })
+    .eq('id', uid)
+  if (error) throw error
+}
