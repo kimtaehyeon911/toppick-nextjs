@@ -138,8 +138,15 @@ export async function purchasePass(
   const P = initPaddle()
   if (!P) throw new Error('Paddle not loaded')
 
+// Pass the user's own JWT so the edge fn resolves the RIGHT uid.
+  // Without this, invoke() sends the anon key and the pass gets attributed
+  // to the wrong (or anonymous) account.
+  const session = (await supabase.auth.getSession()).data.session
+  if (!session) throw new Error('no session')
+
   const { data, error } = await supabase.functions.invoke('paddle-checkout', {
     body: { kind, sport, matchId: matchId ?? null },
+    headers: { Authorization: `Bearer ${session.access_token}` },
   })
   if (error || !data?.transactionId) {
     throw error ?? new Error('checkout failed')
