@@ -156,11 +156,9 @@ P.Checkout.open({
     transactionId: data.transactionId,
     // fires when the buyer completes payment in the overlay
     eventCallback: (ev: any) => {
+      console.log('[paddle event]', ev?.name, ev)
       if (ev?.name === 'checkout.completed') {
-        // close Paddle's overlay right away so the user lands back on our UI
-        try { P.Checkout.close() } catch {}
-        // webhook writes the pass async; poll passes until it lands, then
-        // onComplete refreshes entitlements and closes our modal
+        try { P.Checkout.close() } catch (e) { console.log('close failed', e) }
         pollForPass(kind, matchId, sport, onComplete)
       }
     },
