@@ -24,7 +24,7 @@ export default function PrivacyPage() {
         If you are a California resident, you have the right to access, delete,
         and opt out of the sale of your personal information. We do not sell
         personal information. To exercise these rights, contact us at
-        [PLACEHOLDER: privacy contact email].
+        privacy@jointoppick.com.
       </p>
       <p>
         <strong>Do Not Sell or Share My Personal Information:</strong> Top Pick
@@ -56,8 +56,7 @@ export default function PrivacyPage() {
 <h2>6. Contact</h2>
       <p>
         For any privacy-related inquiries or to exercise your rights, please
-        contact us at [privacy contact email — to be added] or via mail at
-        [business mailing address — to be added].
+        contact us at privacy@jointoppick.com.
       </p>
     </LegalPage>
   )

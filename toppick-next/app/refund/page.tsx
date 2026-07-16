@@ -31,7 +31,7 @@ export default function RefundPage() {
       <p>
         <strong>Refund Request Window and Process:</strong> To request a refund
         for an eligible cancelled match (as defined in Section 2), you must
-        contact us at [support contact email — to be added] within seven (7) days
+        contact us at support@jointoppick.com within seven (7) days
         of the official announcement of the match cancellation.
       </p>
       <p>
