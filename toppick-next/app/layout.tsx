@@ -5,8 +5,25 @@ import { ConsentGate } from '@/components/consent-gate'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: { default: 'Top Pick — Skill Market for Sports Predictions', template: '%s · Top Pick' },
+  metadataBase: new URL('https://jointoppick.com'),
+  title: {
+    default: 'Top Pick — Skill Market for Sports Predictions',
+    template: '%s · Top Pick',
+  },
   description: 'Cast free picks, beat the crowd consensus, build a verified track record. A skill market — not a betting platform.',
+  keywords: ['sports predictions', 'prediction market', 'sports analysis', 'crowd consensus', 'NFL predictions', 'NBA predictions', 'sports picks'],
+  openGraph: {
+    type: 'website',
+    siteName: 'Top Pick',
+    title: 'Top Pick — Skill Market for Sports Predictions',
+    description: 'Cast free picks, beat the crowd consensus, build a verified track record. No wagers, ever.',
+    url: 'https://jointoppick.com',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Top Pick — Skill Market for Sports Predictions',
+    description: 'Cast free picks, beat the crowd consensus, build a verified track record.',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
