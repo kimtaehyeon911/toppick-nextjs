@@ -59,7 +59,14 @@ export function Providers({ children }: { children: ReactNode }) {
     setOpenPanels(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
   }, [])
 
-  const requestUnlock = useCallback((m: Match) => setPayTarget(m), [])
+  const starsComingSoon = process.env.NEXT_PUBLIC_STARS_COMING_SOON === 'true'
+  const requestUnlock = useCallback((m: Match) => {
+    if (starsComingSoon) {
+      toast('\u2605', "Star picks are coming soon \u2014 keep making picks to climb the leaderboard and become a Star.")
+      return
+    }
+    setPayTarget(m)
+  }, [starsComingSoon, toast])
 
   const buy = async (kind: 'single' | 'weekly') => {
     const m = payTarget; if (!m) return
