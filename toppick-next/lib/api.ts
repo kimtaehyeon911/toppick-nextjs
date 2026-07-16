@@ -376,6 +376,48 @@ export async function getSkill(): Promise<SkillSummary> {
   return { bySport, overall, totalN: bySport.reduce((s, r) => s + r.n, 0) }
 }
 
+
+// ---------- leaderboard (real, from leaderboard view) ----------
+export type LbRow = {
+  rank: number
+  userId: string
+  name: string
+  handle: string
+  initials: string
+  skill: number
+  lo: number
+  hi: number
+  w: number
+  l: number
+  n: number
+  isStar: boolean
+}
+
+export async function getLeaderboard(sport: string): Promise<LbRow[]> {
+  if (!hasBackend || !supabase) return []
+  const { data, error } = await supabase
+    .from('leaderboard')
+    .select('rank, user_id, display_name, handle, initials, skill, lo, hi, wins, losses, n, is_star')
+    .eq('sport', sport)
+    .order('rank', { ascending: true })
+    .limit(100)
+  if (error || !data) return []
+  return data.map((r: any) => ({
+    rank: Number(r.rank),
+    userId: r.user_id,
+    name: r.display_name ?? 'Anonymous',
+    handle: r.handle ?? '',
+    initials: r.initials ?? '??',
+    skill: Number(r.skill),
+    lo: Number(r.lo),
+    hi: Number(r.hi),
+    w: Number(r.wins),
+    l: Number(r.losses),
+    n: Number(r.n),
+    isStar: !!r.is_star,
+  }))
+}
+
 // ---------- entitlements (what passes unlock) ----------
 // The webhook writes passes asynchronously, so the client reads them back
 // to learn what it can view. Single -> that match; weekly -> that sport
